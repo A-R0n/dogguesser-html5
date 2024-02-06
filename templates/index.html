@@ -33,7 +33,9 @@
                     uploadFile(file, response.data, response.url);
                 }
                 else{
-                alert("Could not get signed URL.");
+                    console.log("xml request status code...")
+                    console.log(xhr.status)
+                    alert("Could not get signed URL.");
                 }
             }
         };
