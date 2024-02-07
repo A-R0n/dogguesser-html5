@@ -9,27 +9,51 @@
         font-family: sans-serif;
         }
 
+        body {
+            max-height: 100vh;
+            max-width: 100%;
+        }
+
         form {
-        background: #ccc;
-        border: 1px solid black;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        max-height: 100vh;
-        max-width: 100%;
+            margin: auto;
+            background: #ccc;
+            border: 1px solid black;
+        }
+
+        .image_form {
+            position: relative;
+            background: purple;
+            display: flex;
+            justify-content: center;
+            max-height: 98vh;
         }
         
         #img_2_upload {
             max-height: 70vh;
-            max-width: 100%;
+            max-width: 90%;
+            display: flex;
+            justify-content: center;
+            margin: auto;
         }
 
-        form li,
-        div > p {
-        background: green;
-        list-style-type: none;
-        border: 1px solid black;
+        .file_container {
+            background: yellow;
+            position: absolute;
+            max-width: 100px;
+            left: 10px;
+            top: 5px;
+        }
+        #photo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 17px;
+        }
+
+        form li {
+            background: green;
+            list-style-type: none;
+            border: 1px solid black;
         }
 
         form label,
@@ -53,22 +77,29 @@
         color: white;
         }
 
+        #submit-btn {
+            position: absolute;
+            bottom: 10%;
+            right: 38%;
+            left: 42%;
+        }
+
     </style>
 </head>
 <body>
-   <!-- <label for="selfie" class="capture-button">Front Camera</label>
-    <input type="file" id="selfie" capture="user" accept="image/*"> -->
 
     <form method="post" enctype="multipart/form-data">
-        <div>  
-            <label for="photo" class="capture-button">Back Camera</label>
-            <input type="file" id="photo" capture="environment" accept="image/*">
-        </div>
-        <div class="preview">
-            <p>No files currently selected for upload</p>
-        </div>
-        <div>
-            <button>Submit</button>
+        <div class="image_form">
+            <div class="file_container"> 
+                <label for="photo" class="capture-button">Back Camera</label>
+                <input type="file" id="photo" capture="environment" accept="image/*">
+            </div>
+            <div class="preview">
+                <p>No files currently selected for upload</p>
+            </div>
+            <div>
+                <button id="submit-btn">Submit</button>
+            </div>
         </div>
     </form>
 
