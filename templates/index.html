@@ -79,15 +79,15 @@
 
         form label,
         form button {
-        background-color: #7f9ccb;
         padding: 5px 10px;
         border-radius: 5px;
         border: 1px ridge black;
         font-size: 0.8rem;
+        cursor: pointer;
         }
 
-        form label:hover,
-        form button:hover {
+        #submit-btn:hover,
+        #submit-btn:hover {
         background-color: #bdb28d;
         color: white;
         }
@@ -99,6 +99,8 @@
         }
 
         #submit-btn {
+            /* background-color: white; */
+
             position: absolute;
             width: 100%;
             height: 12%;
@@ -113,6 +115,11 @@
             visibility: hidden;
         }
 
+        /* #photo-camera {
+            height: 50px;
+            width: 50px;
+        } */
+
     </style>
 </head>
 <body>
@@ -120,7 +127,11 @@
     <form method="post" enctype="multipart/form-data">
         <div class="image_form">
             <div class="file_container"> 
-                <label for="photo" class="capture-button">Back Camera</label>
+                <!-- <label for="photo" class="capture-button">Back Camera</label> -->
+                <label for="photo" class="capture-button">
+                    <img src="/static/camera-white.jpeg" id="photo-camera" alt="Back Camera" width="50" height="50"/>
+                </label>
+
                 <input type="file" id="photo" capture="environment" accept="image/*">
             </div>
             <div class="preview">
