@@ -11,35 +11,25 @@
 
         form {
         background: #ccc;
-        margin: 0 auto;
-        padding: 20px;
         border: 1px solid black;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        max-height: 100vh;
+        max-width: 100%;
         }
+        
         #img_2_upload {
-            height: 100vh;
-        }
-        form ol {
-        padding-left: 0;
+            max-height: 70vh;
+            max-width: 100%;
         }
 
         form li,
         div > p {
-        background: #eee;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
+        background: green;
         list-style-type: none;
         border: 1px solid black;
-        }
-
-        form img {
-        /* height: 64px; */
-        order: 1;
-        }
-
-        form p {
-        line-height: 32px;
-        padding-left: 10px;
         }
 
         form label,
@@ -49,7 +39,6 @@
         border-radius: 5px;
         border: 1px ridge black;
         font-size: 0.8rem;
-        height: auto;
         }
 
         form label:hover,
