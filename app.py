@@ -5,6 +5,7 @@ import boto3
 
 
 app = Flask(__name__)
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -39,7 +40,7 @@ def sign_s3():
   })
 
 def main():
-   app.run()
+   app.run(debug=False)
 
 if __name__ == "__main__":
    main()
