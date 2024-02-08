@@ -3,7 +3,7 @@ import json
 import boto3
 
 app = Flask(__name__)
-
+app = Flask(static_folder='static')
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -34,4 +34,4 @@ def sign_s3():
   })
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5001, debug=True)
