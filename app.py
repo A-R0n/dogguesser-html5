@@ -3,7 +3,6 @@ import json
 import boto3
 
 app = Flask(__name__)
-app = Flask(static_folder='static')
 @app.route("/")
 def index():
     return render_template('index.html')
