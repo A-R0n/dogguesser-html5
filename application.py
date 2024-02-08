@@ -36,3 +36,9 @@ def sign_s3():
     'data': presigned_post,
     'url': url
   })
+
+# def main():
+#    app.run(debug=False)
+
+# if __name__ ==  '__main__':
+#    main()
