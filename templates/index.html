@@ -109,9 +109,11 @@
             console.log("attempting to blur image")
             var img = document.getElementById('img_2_upload');
             img.style.filter = 'blur(5px)';
-            // const para = document.createElement("p");
-            // para.append("Image uploaded!");
-            // preview.replaceChildren(para);
+            
+            var files = document.getElementById("photo").files;
+            var file = files[0];
+            console.log(`attempting to get signed request with file: ${file}`)
+            getSignedRequest(file)
         });
 
 
@@ -126,48 +128,52 @@
     //     };
     // })();
 
-    // function getSignedRequest(file){
-    //     var xhr = new XMLHttpRequest();
-    //     xhr.open("GET", "/sign_s3?file_name="+file.name+"&file_type="+file.type);
-    //     xhr.onreadystatechange = function(){
-    //         if(xhr.readyState === 4){
-    //             if(xhr.status === 200){
-    //                 var response = JSON.parse(xhr.responseText);
-    //                 console.log(`file: ${file} , response data ${response.data} , response url ${response.url}`)
-    //                 uploadFile(file, response.data, response.url);
-    //             }
-    //             else{
-    //                 console.log("xml request status code...")
-    //                 console.log(xhr.status)
-    //                 alert("Could not get signed URL.");
-    //             }
-    //         }
-    //     };
-    //     xhr.send();
-    // }
+    function getSignedRequest(file){
+        var xhr = new XMLHttpRequest();
+        console.log("attempting to xhr open...")
+        xhr.open("GET", "/sign_s3?file_name="+file.name+"&file_type="+file.type);
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4){
+                if(xhr.status === 200){
+                    console.log("xhr status 200!")
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(`file: ${file} , response data ${response.data} , response url ${response.url}`)
+                    uploadFile(file, response.data, response.url);
+                }
+                else{
+                    console.log(`xml request status code ${xhr.status}`)
+                    alert("Could not get signed URL.");
+                }
+            }
+        };
+        console.log("xhr send from getSignedRequest...")
+        xhr.send();
+    }
 
-    // function uploadFile(file, s3Data, url){
-    //     var xhr = new XMLHttpRequest();
-    //     xhr.open("POST", s3Data.url);
+    function uploadFile(file, s3Data, url){
+        console.log("uploading file")
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", s3Data.url);
 
-    //     var postData = new FormData();
-    //     for(key in s3Data.fields){
-    //         postData.append(key, s3Data.fields[key]);
-    //     }
-    //     postData.append('file', file);
+        var postData = new FormData();
+        for(key in s3Data.fields){
+            postData.append(key, s3Data.fields[key]);
+        }
+        postData.append('file', file);
 
-    //     xhr.onreadystatechange = function() {
-    //         if(xhr.readyState === 4){
-    //             if(xhr.status === 200 || xhr.status === 204){
-    //                 console.log("xhr status 200")
-    //             }
-    //             else{
-    //                 alert("Could not upload file.");
-    //             }
-    //         }
-    //     };
-    //     xhr.send(postData);
-    // }
+        xhr.onreadystatechange = function() {
+            if(xhr.readyState === 4){
+                if(xhr.status === 200 || xhr.status === 204){
+                    console.log("xhr status 200")
+                }
+                else{
+                    alert("Could not upload file.");
+                }
+            }
+        };
+        console.log("xhr send from uploadFile...")
+        xhr.send(postData);
+    }
     </script>   
  
 </body>

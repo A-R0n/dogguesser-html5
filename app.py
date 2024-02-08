@@ -12,9 +12,11 @@ def sign_s3():
   S3_BUCKET = 'dogguesser'
 
   file_name = request.args.get('file_name')
+  print(f'file name sign s3 {file_name}')
   file_type = request.args.get('file_type')
-
+  print("initiating boto client")
   s3 = boto3.client('s3')
+  print("attempting to presign post")
 
   presigned_post = s3.generate_presigned_post(
     Bucket = S3_BUCKET,
@@ -26,10 +28,12 @@ def sign_s3():
     ],
     ExpiresIn = 3600
   )
-
+  print(f'presigned post {presigned_post}')
+  url = 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+  print(f'new url is {url}')
   return json.dumps({
     'data': presigned_post,
-    'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET, file_name)
+    'url': url
   })
 
 if __name__ == "__main__":
