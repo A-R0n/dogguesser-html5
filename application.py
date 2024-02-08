@@ -2,8 +2,6 @@ from flask import Flask, render_template, request
 import json
 import boto3
 
-
-
 app = Flask(__name__)
 
 @app.route("/")
@@ -38,9 +36,3 @@ def sign_s3():
     'data': presigned_post,
     'url': url
   })
-
-def main():
-   app.run(debug=False)
-
-if __name__ == "__main__":
-   main()
