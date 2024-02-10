@@ -105,10 +105,21 @@ color: white;
 }
 
 p {
-    visibility: hidden;
+    /* visibility: hidden; */
 }
 
 /* #photo-camera {
     height: 50px;
     width: 50px;
 } */
+
+
+#hi {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3em;
+    z-index: 5;
+    color: white;
+}
