@@ -4,29 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Camera Capture</title>
-    <!-- <link rel="stylesheet" href="/static/css/style.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-
-
 </head>
 <body>
+        <form action="{{url_for('create')}}" method="POST" enctype="multipart/form-data" name="my-form">
 
-    <form method="post" enctype="multipart/form-data">
         <div class="image_form">
             <div class="file_container"> 
-                <!-- <label for="photo" class="capture-button">Back Camera</label> -->
                 <label for="photo" class="capture-button">
                     <img src="/static/camera-white.jpeg" id="photo-camera" alt="Back Camera" width="50" height="50"/>
-                    <!-- <img src="{{url_for('static', filename = '/var/www/dogguesser-html5/css/camera-white.jpeg')}}" id="photo-camera" alt="Back Camera" width="50" height="50"/> -->
                 </label>
-
-                <input type="file" id="photo" capture="environment" accept="image/*">
+                <input type="file" id="photo" capture="environment" accept="image/*" name="user_file">
             </div>
             <div class="preview">
                 <p>No files currently selected for upload</p>
             </div>
             <div>
-                <button id="submit-btn">Submit</button>
+                <p id="hi" style="visibility: {{visibility}};">{{guess}}</p>
+                <p><input type = "hidden" name = "imagesrc" id="imagesrc"  value=""/></p>
+                <button id="submit-btn" type="submit" value='s3_send' name="click">Submit</button>
             </div>
         </div>
     </form>
@@ -45,12 +41,7 @@
             }
 
             const curFiles = input.files;
-            if (curFiles.length === 0) {
-                const para = document.createElement("p");
-                para.textContent = "No files currently selected for upload";
-                preview.appendChild(para);
-            } 
-            else {
+            if (curFiles.length > 0) {
                 const list = document.createElement("ol");
                 preview.appendChild(list);
 
@@ -61,7 +52,9 @@
                         const image = document.createElement("img");
                         image.setAttribute("id", "img_2_upload");
                         image.src = URL.createObjectURL(file);
+                        // document.getElementById("imagesrc").value = image.src;
                         image.alt = image.title = file.name;
+
 
                     listItem.appendChild(image);
                     }
@@ -91,92 +84,37 @@
         function validFileType(file) {
             return fileTypes.includes(file.type);
         }
-
-        function returnFileSize(number) {
-            if (number < 1024) {
-                return `${number} bytes`;
-            }
-            else if (number >= 1024 && number < 1048576) {
-                return `${(number / 1024).toFixed(1)} KB`;
-            }
-            else if (number >= 1048576) {
-                return `${(number / 1048576).toFixed(1)} MB`;
-            }
-        }
-
-        const button = document.querySelector("form button");
-
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            console.log("attempting to blur image")
-            var img = document.getElementById('img_2_upload');
-            img.style.filter = 'blur(5px)';
-            
-            var files = document.getElementById("photo").files;
-            var file = files[0];
-            console.log(`attempting to get signed request with file: ${file}`)
-            getSignedRequest(file)
-        });
-
-
-    //     (function() {
-    //         document.getElementById("photo").onchange = function(){
-    //         var files = document.getElementById("photo").files;
-    //         var file = files[0];
-    //         if(!file){
-    //             return alert("No file selected.");
-    //         }
-    //         getSignedRequest(file);
-    //     };
-    // })();
-
-    function getSignedRequest(file){
-        var xhr = new XMLHttpRequest();
-        console.log("attempting to xhr open...")
-        xhr.open("GET", "/sign_s3?file_name="+file.name+"&file_type="+file.type);
-        xhr.onreadystatechange = function(){
-            if(xhr.readyState === 4){
-                if(xhr.status === 200){
-                    console.log("xhr status 200!")
-                    var response = JSON.parse(xhr.responseText);
-                    console.log(`file: ${file} , response data ${response.data} , response url ${response.url}`)
-                    uploadFile(file, response.data, response.url);
-                }
-                else{
-                    console.log(`xml request status code ${xhr.status}`)
-                    alert("Could not get signed URL.");
-                }
-            }
-        };
-        console.log("xhr send from getSignedRequest...")
-        xhr.send();
-    }
-
-    function uploadFile(file, s3Data, url){
-        console.log("uploading file")
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", s3Data.url);
-
-        var postData = new FormData();
-        for(key in s3Data.fields){
-            postData.append(key, s3Data.fields[key]);
-        }
-        postData.append('file', file);
-
-        xhr.onreadystatechange = function() {
-            if(xhr.readyState === 4){
-                if(xhr.status === 200 || xhr.status === 204){
-                    console.log("xhr status 200")
-                }
-                else{
-                    alert("Could not upload file.");
-                }
-            }
-        };
-        console.log("xhr send from uploadFile...")
-        xhr.send(postData);
-    }
     </script>   
+
+    <script type="text/javascript">
+        (uri => {
+            // Register a listener for submit events.
+            const form = document.querySelector('form[name="my-form"]');
+            form.addEventListener('submit', evt => {
+            // Suppress the default behavior of the form.
+            evt.preventDefault();
+            var img = document.getElementById('img_2_upload');
+            img.style.filter = 'blur(10px)';
+            // Submit the form data.
+            fetch(uri, {
+                method: 'post',
+                body: new FormData(evt.target)
+            }).then(resp => resp.json())
+                .then(hi => {
+                console.log(hi);
+                document.getElementById("hi").style.visibility = "visible";
+                document.getElementById("hi").innerHTML = hi.guess
+                // Handle response here.
+                });
+            // Reset the form.
+            evt.target.reset();
+            
+            });
+        })({{ url_for('change_label') | tojson }});
+    </script>
+
+
+
  
 </body>
 </html>
