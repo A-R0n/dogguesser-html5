@@ -7,25 +7,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
 </head>
 <body>
-        <form action="{{url_for('create')}}" method="POST" enctype="multipart/form-data" name="my-form">
-
-        <div class="image_form">
-            <div class="file_container"> 
-                <label for="photo" class="capture-button">
-                    <img src="/static/camera-white.jpeg" id="photo-camera" alt="Back Camera" width="50" height="50"/>
-                </label>
-                <input type="file" id="photo" capture="environment" accept="image/*" name="user_file">
+        <form action="{{url_for('change_label')}}" method="POST" enctype="multipart/form-data" name="my-form">
+            <div class="image_form">
+                <div class="file_container"> 
+                    <label for="photo" class="capture-button">
+                        <img src="/static/camera-white.jpeg" id="photo-camera" alt="Back Camera" width="50" height="50"/>
+                    </label>
+                    <input type="file" id="photo" capture="environment" accept="image/*" name="user_file">
+                </div>
+                <div class="preview">
+                    <p>No files currently selected for upload</p>
+                </div>
+                <div>
+                    <p id="hi" style="visibility: {{visibility}};">{{guess}}</p>
+                    <p><input type = "hidden" name = "imagesrc" id="imagesrc"  value=""/></p>
+                    <button id="submit-btn" type="submit" value='s3_send' name="click">Guess</button>
+                </div>
             </div>
-            <div class="preview">
-                <p>No files currently selected for upload</p>
-            </div>
-            <div>
-                <p id="hi" style="visibility: {{visibility}};">{{guess}}</p>
-                <p><input type = "hidden" name = "imagesrc" id="imagesrc"  value=""/></p>
-                <button id="submit-btn" type="submit" value='s3_send' name="click">Submit</button>
-            </div>
-        </div>
-    </form>
+        </form>
 
     <script>
         const input = document.querySelector("input");

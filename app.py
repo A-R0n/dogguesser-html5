@@ -6,19 +6,8 @@ from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
 
-class LabelClass:
-    def __init__(self):
-        self.label = None
-
-lc = LabelClass()
-
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
-
-data = {
-    "guess": "N/A",
-    "visibility": "hidden"
-}
 
 logging.basicConfig(level=logging.WARNING)
 application = Flask(__name__)
@@ -28,10 +17,6 @@ application.wsgi_app = ProxyFix(
 application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['SESSION_TYPE'] = 'filesystem'
 application.secret_key="anystringhere"
-
-# @app.route("/")
-# def index():
-#     return "<h1 style='color:blue'> A very simple Flask server!</h1>"
 
 def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
@@ -49,17 +34,11 @@ def upload_file_to_s3(file, acl="public-read"):
             },
             Config=config
         )
-        ## if we do this below, then that means even the root user cant look at the image
-    # try:
-    #     s3.upload_fileobj(
-    #         file,
-    #         'dogguesser',
-    #         file.filename
-    #     )
+        return "success"
     except Exception as e:
         application.logger.warning(f'Something Happened: {e}')
-    # return file.filename
 
+    return "fail"
 
 @application.route("/")
 def index():
@@ -69,26 +48,8 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@application.route("/change_label", methods=["POST", "GET"])
+@application.route("/change_label", methods=["POST"])
 def change_label():
-    global lc
-    guess = str(lc.label)
-    file = request.files['user_file']
-    if file and allowed_file(file.filename):
-        print(f'fileeeee {file}')
-        dog_guessed = guess_dog(file)
-        upload_file_to_s3(file)
-
-        return jsonify({"guess": dog_guessed, "visibility": "visible"})
-    #Return the text you want the label to be
-    return jsonify({"guess": guess, "visibility": "visible"})
-    # return message
-
-
-@application.route("/upload", methods=["POST"])
-def create():
-    global lc
-    print(f'inside create')
     if 'user_file' not in request.files:
         application.logger.warning(f'uh oh')
         flash('No user_file key in request.files')
@@ -99,27 +60,17 @@ def create():
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        ## this is a `<FilStorage: 'daniel_dog.JPG ('image/jpeg')` object
-        ## https://tedboy.github.io/flask/generated/generated/werkzeug.FileStorage.html
-        print(file)
+        print(f'fileeeee {file}')
         # output = upload_file_to_s3(file)
-        output = None
+        output = True
         dog_guessed = guess_dog(file)
-        data = {"guess": dog_guessed, "visibility": "visible"}
-        lc.label = dog_guessed
-
         if output:
-            flash("Success upload")
-            ## we need to send our dog_guessed variable to a p tag in our html
-            return 'nice'
+            return jsonify({"guess": dog_guessed, "visibility": "visible"})
         else:
-            flash("Unable to upload, try again")
-            return redirect(url_for('change_label'))
-        
-    else:
-        flash("File type not accepted,please try again.")
-        return redirect(url_for('index'))
+            return jsonify({"guess": "no output", "visibility": "visible"})
+    #Return the text you want the label to be
+    return jsonify({"guess": "None", "visibility": "visible"})
+    # return message
 
 if __name__ == "__main__":
-    # application.run(host='0.0.0.0', port='8080')
-      application.run(host='0.0.0.0', port='8080')
+      application.run(host='0.0.0.0', port='8080', debug=True)
