@@ -20,7 +20,7 @@ application.secret_key="anystringhere"
 
 def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
-    filename = secure_filename(file.filename)
+    # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
@@ -60,7 +60,6 @@ def change_label():
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        print(f'fileeeee {file}')
         # output = upload_file_to_s3(file)
         output = True
         dog_guessed = guess_dog(file)
@@ -74,3 +73,4 @@ def change_label():
 
 if __name__ == "__main__":
       application.run(host='0.0.0.0', port='8080')
+      # application.run(host='0.0.0.0', port='8080', debug=True)
