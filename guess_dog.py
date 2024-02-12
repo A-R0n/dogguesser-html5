@@ -6,7 +6,7 @@ import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 import torch
-import urllib
+# import urllib
 
 imagenet_classes_file = "imagenet_classes.txt"
 imagenet_classes_download = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
@@ -35,14 +35,6 @@ class GuessDog:
         with torch.no_grad():
             return self.model(self.tensor)
         
-    def _get_imagenet_classes(self):
-        if not os.path.isfile(imagenet_classes_file):
-            # print(f'we need to download the imagenet clases from github')
-            urllib.request.urlretrieve(imagenet_classes_download, imagenet_classes_file)
-        else:
-            pass
-            # print(f'imagenet classes available to us locally')
-
     def _structure_imagenet_classes(self):
         with open(imagenet_classes_file, "r") as f:
             return [s.strip() for s in f.readlines()] 
@@ -64,7 +56,7 @@ class GuessDog:
                 try:
                     category_name = self.categories[idx_category]
                     prob = str(round(float(self.topn_prob[i].item()*100), 1)) + "%"
-                    # print(category_name, prob)
+                    print(f'category_name: {category_name}, prob: {prob}')
                 except IndexError:
                     continue
             else:
@@ -78,7 +70,6 @@ class GuessDog:
         self.tensor = self.transform(self.img).unsqueeze(0)
         self.output = self._get_output()
         self.probabilities = torch.nn.functional.softmax(self.output[0], dim=0)
-        self._get_imagenet_classes()
         self.categories = self._structure_imagenet_classes()
         self.topn_prob, self.topn_catid = self._get_most_probable(3)
         self._display_results()
