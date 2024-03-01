@@ -67,9 +67,9 @@ async def change_label():
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
         dog_guessed = guess_dog(file)
-        # output = upload_file_to_s3(file)
-        output = True
-        if output:
+        output = upload_file_to_s3(file)
+        # output = True
+        if output == 'success':
             return jsonify({"guess": dog_guessed, "visibility": "visible"})
         else:
             return jsonify({"guess": 'No output', "visibility": "visible"})
