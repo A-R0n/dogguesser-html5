@@ -61,7 +61,7 @@ async def change_label():
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
         dog_guessed = guess_dog(file)
-        upload_file_to_s3(file)
+        # upload_file_to_s3(file)
         return jsonify({"guess": dog_guessed, "visibility": "visible"})
     #Return the text you want the label to be
     return jsonify({"guess": "None", "visibility": "visible"})
