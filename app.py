@@ -5,6 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
+import time
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
@@ -20,6 +21,8 @@ application.secret_key="anystringhere"
 
 def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
+    # loop = asyncio.get_event_loop()
+    # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
@@ -35,6 +38,9 @@ def upload_file_to_s3(file, acl="public-read"):
         )
     except Exception as e:
         application.logger.warning(f'Something Happened: {e}')
+
+    print(f'returning success')
+    return "success"
 
 @application.route("/")
 def index():
@@ -61,8 +67,11 @@ async def change_label():
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
         dog_guessed = guess_dog(file)
-        # upload_file_to_s3(file)
-        return jsonify({"guess": dog_guessed, "visibility": "visible"})
+        output = upload_file_to_s3(file)
+        if output == 'success':
+            return jsonify({"guess": dog_guessed, "visibility": "visible"})
+        else:
+            return jsonify({"guess": 'No output', "visibility": "visible"})
     #Return the text you want the label to be
     return jsonify({"guess": "None", "visibility": "visible"})
     # return message
