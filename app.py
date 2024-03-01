@@ -5,6 +5,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
+import asyncio
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
@@ -18,13 +19,13 @@ application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['SESSION_TYPE'] = 'filesystem'
 application.secret_key="anystringhere"
 
-def upload_file_to_s3(file, acl="public-read"):
+async def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
     # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
-        s3.upload_fileobj(
+        await s3.upload_fileobj(
             file,
             'dogguesser',
             file.filename,
@@ -48,6 +49,12 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def provide_dog_guess(guess: dict):
+    return jsonify(guess)
+
+def init_upload(file):
+    return upload_file_to_s3(file)
+
 @application.route("/change_label", methods=["POST"])
 def change_label():
     if 'user_file' not in request.files:
@@ -60,10 +67,9 @@ def change_label():
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        # output = upload_file_to_s3(file)
-        output = True
+        output = asyncio.run(upload_file_to_s3(file))
         dog_guessed = guess_dog(file)
-        if output:
+        if output == 'success':
             return jsonify({"guess": dog_guessed, "visibility": "visible"})
         else:
             return jsonify({"guess": "no output", "visibility": "visible"})
@@ -73,4 +79,4 @@ def change_label():
 
 if __name__ == "__main__":
       application.run(host='0.0.0.0', port='8080')
-      # application.run(host='0.0.0.0', port='8080', debug=True)
+    #   application.run(host='0.0.0.0', port='8080', debug=True)
