@@ -5,7 +5,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
-import asyncio
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
@@ -21,7 +20,6 @@ application.secret_key="anystringhere"
 
 def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
-    # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
@@ -35,11 +33,8 @@ def upload_file_to_s3(file, acl="public-read"):
             },
             Config=config
         )
-        return "success"
     except Exception as e:
         application.logger.warning(f'Something Happened: {e}')
-
-    return "fail"
 
 @application.route("/")
 def index():
@@ -53,23 +48,21 @@ def provide_dog_guess(guess: dict):
     return jsonify(guess)
 
 @application.route("/change_label", methods=["POST"])
-def change_label():
+async def change_label():
     if 'user_file' not in request.files:
         application.logger.warning(f'uh oh')
         flash('No user_file key in request.files')
         return redirect(url_for('index'))
     file = request.files['user_file']
+
     if file.filename == '':
         application.logger.warning(f'oh no')
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        output = upload_file_to_s3(file)
         dog_guessed = guess_dog(file)
-        if output == 'success':
-            return jsonify({"guess": dog_guessed, "visibility": "visible"})
-        else:
-            return jsonify({"guess": "no output", "visibility": "visible"})
+        upload_file_to_s3(file)
+        return jsonify({"guess": dog_guessed, "visibility": "visible"})
     #Return the text you want the label to be
     return jsonify({"guess": "None", "visibility": "visible"})
     # return message
