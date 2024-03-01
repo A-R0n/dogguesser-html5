@@ -19,13 +19,13 @@ application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['SESSION_TYPE'] = 'filesystem'
 application.secret_key="anystringhere"
 
-async def upload_file_to_s3(file, acl="public-read"):
+def upload_file_to_s3(file, acl="public-read"):
     print(f'attempting to upload')
     # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
-        await s3.upload_fileobj(
+        s3.upload_fileobj(
             file,
             'dogguesser',
             file.filename,
@@ -52,9 +52,6 @@ def allowed_file(filename):
 def provide_dog_guess(guess: dict):
     return jsonify(guess)
 
-def init_upload(file):
-    return upload_file_to_s3(file)
-
 @application.route("/change_label", methods=["POST"])
 def change_label():
     if 'user_file' not in request.files:
@@ -67,7 +64,7 @@ def change_label():
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        output = asyncio.run(upload_file_to_s3(file))
+        output = upload_file_to_s3(file)
         dog_guessed = guess_dog(file)
         if output == 'success':
             return jsonify({"guess": dog_guessed, "visibility": "visible"})
