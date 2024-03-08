@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
 import time
+import os
+from threading import Thread
+from queue import Queue
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
@@ -19,9 +22,7 @@ application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['SESSION_TYPE'] = 'filesystem'
 application.secret_key="anystringhere"
 
-def upload_file_to_s3(file, acl="public-read"):
-    print(f'attempting to upload')
-    # loop = asyncio.get_event_loop()
+def upload_file_to_s3(file):
     # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
@@ -31,7 +32,7 @@ def upload_file_to_s3(file, acl="public-read"):
             'dogguesser',
             file.filename,
             ExtraArgs={
-                "ACL": acl,
+                "ACL": "public-read",
                 "ContentType": file.content_type
             },
             Config=config
@@ -41,6 +42,9 @@ def upload_file_to_s3(file, acl="public-read"):
 
     print(f'returning success')
     return "success"
+
+def wrapper(func, arg, queue):
+     queue.put(func(arg))
 
 @application.route("/")
 def index():
@@ -66,16 +70,20 @@ async def change_label():
         flash('No selected file')
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
-        dog_guessed = guess_dog(file)
+        q1, q2 = Queue(), Queue()
         # output = upload_file_to_s3(file)
-        output = True
-        if output:
-            return jsonify({"guess": dog_guessed, "visibility": "visible"})
-        else:
-            return jsonify({"guess": 'No output', "visibility": "visible"})
+        print(f'starting first thread')
+        Thread(target=wrapper, args=(upload_file_to_s3, file, q1)).start() 
+        print(f'starting second thread')
+        Thread(target=wrapper, args=(guess_dog, file, q2)).start()
+        output = q1.get()
+        dog_guessed = q2.get()
+        return jsonify({"guess": dog_guessed, "visibility": "visible"})
     #Return the text you want the label to be
     return jsonify({"guess": "None", "visibility": "visible"})
     # return message
+
+
 
 if __name__ == "__main__":
       application.run(host='0.0.0.0', port='8080')
