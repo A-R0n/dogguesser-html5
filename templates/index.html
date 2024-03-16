@@ -97,23 +97,24 @@
                 // Register a listener for submit events.
                 const form = document.querySelector('form[name="my-form"]');
                 form.addEventListener('submit', evt => {
-                // Suppress the default behavior of the form.
-                // when we dont prevent default behavior, theres no image but maybe it uploads
-                // to S3 from ec2?
-                // evt.preventDefault();
-                var img = document.getElementById('img_2_upload');
-                img.style.filter = 'blur(10px)';
-                fetch(uri, {
-                    method: 'post',
-                    body: new FormData(evt.target)
-                }).then(resp => resp.json())
+                    // prevent default stops the default action of the submit button,
+                    // in our example it will prevent a link from following the url
+                    evt.preventDefault();
+                    var img = document.getElementById('img_2_upload');
+                    img.style.filter = 'blur(10px)';
+                    console.log(`event.target: ${evt.target}`);
+                    fetch(uri, {
+                        method: 'post',
+                        body: new FormData(evt.target)
+                    }).then(resp => resp.json())
                     .then(hi => {
                     console.log(hi);
                     document.getElementById("hi").style.visibility = "visible";
-                    document.getElementById("hi").innerHTML = hi.guess
+                    document.getElementById("hi").innerHTML = hi.guess;
                     // Handle response here.
                     });
                 // Reset the form.
+                console.log('resetting the form')
                 evt.target.reset();
                 
                 });
