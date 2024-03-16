@@ -91,36 +91,31 @@
             }
         </script>
         <script>
-            function doFetchStuff(uri, evt) {
+            async function doFetchStuff(uri, evt) {
                 console.log("doing fetch stuff!!!")
-                fetch(uri, {
+                await fetch(uri, {
                         method: 'POST',
                         body: new FormData(evt.target)
                     }).then(resp => resp.json())
-                    .then(hi => {
-                        console.log(`hi guess ${hi.guess}`)
+                    .then(data => {
                         document.getElementById("hi").style.visibility = "visible";
-                        document.getElementById("hi").innerHTML = hi.guess
+                        document.getElementById("hi").innerHTML = data.guess
                     });
             }
         </script>
 
         <script>
             (uri => {
-                console.log(`uri ${uri}`)
-                console.log(typeof uri)
                 // Register a listener for submit events.
                 const form = document.querySelector('form[name="my-form"]');
-                form.addEventListener('submit', evt => {
-                    // prevent default stops the default action of the submit button,
-                    // in our example it will prevent a link from following the url
+                form.addEventListener('submit', (evt) => {
                     evt.preventDefault();
                     var img = document.getElementById('img_2_upload');
                     img.style.filter = 'blur(10px)';
-                    console.log(`event.target: ${evt.target}`);
                     doFetchStuff(uri, evt);
-                // Reset the form.
-                evt.target.reset();
+                    // Reset the form.
+                    console.log(`reseting form`);
+                    evt.target.reset();
                 });
             })({{ url_for('change_label') | tojson }});
         </script>
