@@ -10,6 +10,7 @@ import os
 from threading import Thread
 from queue import Queue
 
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = '/app/static'
 
@@ -22,7 +23,13 @@ application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['SESSION_TYPE'] = 'filesystem'
 application.secret_key="anystringhere"
 
+def get_time():
+    return str(time.time_ns())
+
 def upload_file_to_s3(file):
+    file_ext = str(file.filename).split(".")[1]
+    curr_time = get_time()
+    new_file_name = curr_time + "." + file_ext
     # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
@@ -31,7 +38,7 @@ def upload_file_to_s3(file):
         s3.upload_fileobj(
             file,
             'dogguesser',
-            file.filename,
+            new_file_name,
             ExtraArgs={
                 "ACL": "public-read",
                 "ContentType": file.content_type
