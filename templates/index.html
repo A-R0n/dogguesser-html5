@@ -22,7 +22,7 @@
                 <div>
                     <p id="hi" style="visibility: {{visibility}};">{{guess}}</p>
                     <p><input type = "hidden" name = "imagesrc" id="imagesrc"  value=""/></p>
-                    <button id="submit-btn" type="submit" value='s3_send' name="click">Guess</button>
+                    <button id="submit-btn" type="submit" name="click">Guess</button>
                 </div>
             </div>
         </form>
@@ -91,9 +91,10 @@
             }
         </script>   
 
-        <script type="text/javascript">
+        <script>
             (uri => {
                 console.log(`uri ${uri}`)
+                console.log(typeof uri)
                 // Register a listener for submit events.
                 const form = document.querySelector('form[name="my-form"]');
                 form.addEventListener('submit', evt => {
@@ -120,9 +121,5 @@
                 });
             })({{ url_for('change_label') | tojson }});
         </script>
-
-
-
- 
 </body>
 </html>
