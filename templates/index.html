@@ -94,13 +94,13 @@
             async function doFetchStuff(uri, evt) {
                 console.log("doing fetch stuff!!!")
                 await fetch(uri, {
-                        method: 'POST',
-                        body: new FormData(evt.target)
-                    }).then(resp => resp.json())
-                    .then(data => {
-                        document.getElementById("hi").style.visibility = "visible";
-                        document.getElementById("hi").innerHTML = data.guess
-                    });
+                    method: 'POST',
+                    body: new FormData(evt.target)
+                }).then(resp => resp.json())
+                .then(data => {
+                    document.getElementById("hi").style.visibility = "visible";
+                    document.getElementById("hi").innerHTML = data.guess;
+                });
             }
         </script>
 
