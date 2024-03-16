@@ -59,7 +59,7 @@ def allowed_file(filename):
 def provide_dog_guess(guess: dict):
     return jsonify(guess)
 
-@application.route("/change_label", methods=["POST"])
+@application.route("/change_label", methods=["GET","POST"])
 async def change_label():
     if 'user_file' not in request.files:
         application.logger.warning(f'uh oh')
