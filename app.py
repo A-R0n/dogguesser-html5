@@ -27,6 +27,7 @@ def upload_file_to_s3(file):
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
     try:
+        print(f'attemtpting upload...')
         s3.upload_fileobj(
             file,
             'dogguesser',
@@ -38,6 +39,7 @@ def upload_file_to_s3(file):
             Config=config
         )
     except Exception as e:
+        print(f'reached exception in upload')
         application.logger.warning(f'Something Happened: {e}')
 
     print(f'returning success')
