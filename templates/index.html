@@ -93,6 +93,7 @@
 
         <script type="text/javascript">
             (uri => {
+                console.log(`uri ${uri}`)
                 // Register a listener for submit events.
                 const form = document.querySelector('form[name="my-form"]');
                 form.addEventListener('submit', evt => {
