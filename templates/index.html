@@ -90,7 +90,7 @@
                 return fileTypes.includes(file.type);
             }
         </script>
-        <!-- <script>
+        <script>
             async function doFetchStuff(uri, evt) {
                 await fetch(uri, {
                     method: 'POST',
@@ -118,6 +118,6 @@
                     evt.target.reset();
                 });
             })({{ url_for('change_label') | tojson }});
-        </script> -->
+        </script>
 </body>
 </html>
