@@ -86,8 +86,7 @@ async def change_label():
 
 
 if __name__ == "__main__":
-    application.run()
-    # application.run(host='0.0.0.0', port='8000')
-
-    #   application.run(host='0.0.0.0', port='8080')
+    # application.run()
+    # application.run(port='8000')
+    application.run(host='0.0.0.0', port='8000')
     #   application.run(host='0.0.0.0', port='8080', debug=True)
