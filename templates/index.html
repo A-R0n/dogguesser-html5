@@ -92,7 +92,6 @@
         </script>
         <script>
             async function doFetchStuff(uri, evt) {
-                console.log("doing fetch stuff!!!")
                 await fetch(uri, {
                     method: 'POST',
                     body: new FormData(evt.target)
