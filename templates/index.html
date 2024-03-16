@@ -98,10 +98,11 @@
                 const form = document.querySelector('form[name="my-form"]');
                 form.addEventListener('submit', evt => {
                 // Suppress the default behavior of the form.
-                evt.preventDefault();
+                // when we dont prevent default behavior, theres no image but maybe it uploads
+                // to S3 from ec2?
+                // evt.preventDefault();
                 var img = document.getElementById('img_2_upload');
                 img.style.filter = 'blur(10px)';
-                // Submit the form data.
                 fetch(uri, {
                     method: 'post',
                     body: new FormData(evt.target)
