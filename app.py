@@ -61,29 +61,27 @@ def provide_dog_guess(guess: dict):
 
 @application.route("/change_label", methods=["POST"])
 async def change_label():
-    if 'user_file' not in request.files:
-        application.logger.warning(f'uh oh')
-        flash('No user_file key in request.files')
-        return redirect(url_for('index'))
-    file = request.files['user_file']
+    # if 'user_file' not in request.files:
+    #     application.logger.warning(f'uh oh')
+    #     flash('No user_file key in request.files')
+    #     return redirect(url_for('index'))
+    # file = request.files['user_file']
 
-    if file.filename == '':
-        application.logger.warning(f'oh no')
-        flash('No selected file')
-        return redirect(url_for('index'))
-    if file and allowed_file(file.filename):
-        q1, q2 = Queue(), Queue()
-        # output = upload_file_to_s3(file)
-        print(f'starting first thread')
-        Thread(target=wrapper, args=(upload_file_to_s3, file, q1)).start() 
-        print(f'starting second thread')
-        Thread(target=wrapper, args=(guess_dog, file, q2)).start()
-        output = q1.get()
-        dog_guessed = q2.get()
-        return jsonify({"guess": dog_guessed, "visibility": "visible"})
-    #Return the text you want the label to be
+    # if file.filename == '':
+    #     application.logger.warning(f'oh no')
+    #     flash('No selected file')
+    #     return redirect(url_for('index'))
+    # if file and allowed_file(file.filename):
+    #     q1, q2 = Queue(), Queue()
+    #     # output = upload_file_to_s3(file)
+    #     print(f'starting first thread')
+    #     Thread(target=wrapper, args=(upload_file_to_s3, file, q1)).start() 
+    #     print(f'starting second thread')
+    #     Thread(target=wrapper, args=(guess_dog, file, q2)).start()
+    #     output = q1.get()
+    #     dog_guessed = q2.get()
+    #     return jsonify({"guess": dog_guessed, "visibility": "visible"})
     return jsonify({"guess": "None", "visibility": "visible"})
-    # return message
 
 
 
