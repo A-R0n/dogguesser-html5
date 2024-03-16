@@ -89,7 +89,20 @@
             function validFileType(file) {
                 return fileTypes.includes(file.type);
             }
-        </script>   
+        </script>
+        <script>
+            function doFetchStuff(uri, evt) {
+                console.log("doing fetch stuff!!!")
+                fetch(uri, {
+                        method: 'POST',
+                        body: new FormData(evt.target)
+                    }).then(resp => resp.json())
+                    .then(hi => {
+                    document.getElementById("hi").style.visibility = "visible";
+                    document.getElementById("hi").innerHTML = hi.guess
+                    });
+            }
+        </script>
 
         <script>
             (uri => {
@@ -104,20 +117,9 @@
                     var img = document.getElementById('img_2_upload');
                     img.style.filter = 'blur(10px)';
                     console.log(`event.target: ${evt.target}`);
-                    fetch(uri, {
-                        method: 'post',
-                        body: new FormData(evt.target)
-                    }).then(resp => resp.json())
-                    .then(hi => {
-                    console.log(hi);
-                    document.getElementById("hi").style.visibility = "visible";
-                    document.getElementById("hi").innerHTML = hi.guess;
-                    // Handle response here.
-                    });
+                    doFetchStuff(uri, evt);
                 // Reset the form.
-                console.log('resetting the form')
                 evt.target.reset();
-                
                 });
             })({{ url_for('change_label') | tojson }});
         </script>
