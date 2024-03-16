@@ -98,8 +98,9 @@
                         body: new FormData(evt.target)
                     }).then(resp => resp.json())
                     .then(hi => {
-                    document.getElementById("hi").style.visibility = "visible";
-                    document.getElementById("hi").innerHTML = hi.guess
+                        console.log(`hi guess ${hi.guess}`)
+                        document.getElementById("hi").style.visibility = "visible";
+                        document.getElementById("hi").innerHTML = hi.guess
                     });
             }
         </script>
