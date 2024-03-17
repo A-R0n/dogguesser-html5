@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera Capture</title>
+    <title>Dog Guesser</title>
     <link rel="shortcut icon" href="">
     <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
 </head>
@@ -45,7 +45,6 @@
                 while (preview.firstChild) {
                     preview.removeChild(preview.firstChild);
                 }
-
                 const curFiles = input.files;
                 if (curFiles.length > 0) {
                     const list = document.createElement("ol");
@@ -58,10 +57,7 @@
                             const image = document.createElement("img");
                             image.setAttribute("id", "img_2_upload");
                             image.src = URL.createObjectURL(file);
-                            // document.getElementById("imagesrc").value = image.src;
                             image.alt = image.title = file.name;
-
-
                         listItem.appendChild(image);
                         }
 
@@ -113,7 +109,6 @@
 
         <script>
             (uri => {
-                // Register a listener for submit events.
                 const form = document.querySelector('form[name="my-form"]');
                 form.addEventListener('submit', (evt) => {
                     evt.preventDefault();
@@ -121,8 +116,6 @@
                     img.style.filter = 'blur(10px)';
                     toggleLoader("visible");
                     doFetchStuff(uri, evt);
-                    // Reset the form.
-                    console.log(`reseting form`);
                     evt.target.reset();
                 });
             })({{ url_for('change_label') | tojson }});
