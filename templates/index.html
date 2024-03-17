@@ -26,6 +26,7 @@
                 </div>
             </div>
         </form>
+        <div id="loader"></div>
         <script>
             function hidePrediction() {
                 document.getElementById("hi").style.visibility = "hidden";
@@ -100,7 +101,13 @@
                     console.log(`data guess ${data.guess}`)
                     document.getElementById("hi").style.visibility = "visible";
                     document.getElementById("hi").innerHTML = data.guess;
+                    toggleLoader("hidden");
                 });
+            }
+        </script>
+        <script>
+            function toggleLoader(x) {
+                document.getElementById("loader").style.visibility = x;
             }
         </script>
 
@@ -112,6 +119,7 @@
                     evt.preventDefault();
                     var img = document.getElementById('img_2_upload');
                     img.style.filter = 'blur(10px)';
+                    toggleLoader("visible");
                     doFetchStuff(uri, evt);
                     // Reset the form.
                     console.log(`reseting form`);
