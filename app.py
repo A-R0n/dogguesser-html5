@@ -1,12 +1,11 @@
-from flask import Flask,flash,render_template, request, redirect, url_for,make_response,jsonify
+from flask import Flask, flash, render_template, request, redirect, url_for, jsonify
 import boto3
 from boto3.s3.transfer import TransferConfig
 from werkzeug.middleware.proxy_fix import ProxyFix
-from werkzeug.utils import secure_filename
+# from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
 import time
-import os
 from threading import Thread
 from queue import Queue
 
@@ -30,6 +29,7 @@ def upload_file_to_s3(file):
     file_ext = str(file.filename).split(".")[1]
     curr_time = get_time()
     new_file_name = curr_time + "." + file_ext
+    # we shouldnt need to santize the filname because we define acceptable file types before upload
     # filename = secure_filename(file.filename)
     config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
     s3 = boto3.client('s3')
@@ -80,20 +80,17 @@ def change_label():
         return redirect(url_for('index'))
     if file and allowed_file(file.filename):
         q1, q2 = Queue(), Queue()
-        # output = upload_file_to_s3(file)
         print(f'starting first thread')
         Thread(target=wrapper, args=(upload_file_to_s3, file, q1)).start() 
         print(f'starting second thread')
         Thread(target=wrapper, args=(guess_dog, file, q2)).start()
-        output = q1.get()
         dog_guessed = q2.get()
+        _ = q1.get()
         return jsonify({"guess": dog_guessed, "visibility": "visible"})
     return jsonify({"guess": "None", "visibility": "visible"})
 
 
 
 if __name__ == "__main__":
-    # application.run()
-    # application.run(port='8000')
     application.run(host='0.0.0.0', port='8000')
     #   application.run(host='0.0.0.0', port='8080', debug=True)

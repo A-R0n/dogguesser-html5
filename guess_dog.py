@@ -1,12 +1,10 @@
 import sys
 import time
 from PIL import Image
-import os
 import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 import torch
-# import urllib
 
 imagenet_classes_file = "imagenet_classes.txt"
 imagenet_classes_download = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
@@ -29,7 +27,6 @@ class GuessDog:
 
     def _open_with_pil(self):
         self.img = Image.open(self.file).convert('RGB')
-        # print(f'reading image with PIL {self.img}')
 
     def _get_output(self):
         with torch.no_grad():
@@ -44,15 +41,11 @@ class GuessDog:
     
     def _display_results(self):
         for i in range(self.topn_prob.size(0)):
-            # print(f'topn_catid {self.topn_catid}')
-            # print(f'topn_catid at index {self.topn_catid[i]}')
             try:
                 idx_category = self.topn_catid[i]
-                # print(f'idx category {idx_category}')
             except IndexError:
                 continue
             if idx_category >= 151 and idx_category <= 275:
-                # print(f'we found a dog')
                 try:
                     category_name = self.categories[idx_category]
                     prob = str(round(float(self.topn_prob[i].item()*100), 1)) + "%"
@@ -62,7 +55,6 @@ class GuessDog:
             else:
                 break
         idx_category = self.topn_catid[0]
-        # print(f'idx category {idx_category}')
         if idx_category >= 151 and idx_category <= 275:
             self.top_guess = str(self.categories[self.topn_catid[0]]).title()
 
