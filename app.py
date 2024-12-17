@@ -1,56 +1,36 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, jsonify
-import boto3
-from boto3.s3.transfer import TransferConfig
 from werkzeug.middleware.proxy_fix import ProxyFix
-# from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
-import time
+from upload_file_to_s3 import upload_file_to_s3
 from threading import Thread
-from queue import Queue
-
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-UPLOAD_FOLDER = '/app/static'
+import toml
+import os
+from multiprocessing import Process
+import io
+import shutil
 
 logging.basicConfig(level=logging.WARNING)
 application = Flask(__name__)
 application.wsgi_app = ProxyFix(
     application.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
 )
-application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-application.config['SESSION_TYPE'] = 'filesystem'
-application.secret_key="anystringhere"
 
-def get_time():
-    return str(time.time_ns())
+# p ='config.toml'
+p ="/home/ec2-user/app/config.toml"
+with open(p, "r") as f:
+    config = toml.load(f)
 
-def upload_file_to_s3(file):
-    file_ext = str(file.filename).split(".")[1]
-    curr_time = get_time()
-    new_file_name = curr_time + "." + file_ext
-    # we shouldnt need to santize the filname because we define acceptable file types before upload
-    # filename = secure_filename(file.filename)
-    config = TransferConfig(multipart_threshold=1024*250, max_concurrency=10, multipart_chunksize=1024*250, use_threads=True)
-    s3 = boto3.client('s3')
-    try:
-        print(f'attemtpting upload...')
-        s3.upload_fileobj(
-            file,
-            'dogguesser',
-            new_file_name,
-            ExtraArgs={
-                "ACL": "public-read",
-                "ContentType": file.content_type
-            },
-            Config=config
-        )
-    except Exception as e:
-        print(f'reached exception in upload')
-        application.logger.warning(f'Something Happened: {e}')
+application.config.from_object(config)
+application.config.secret_key = os.urandom(24)
 
-    print(f'returning success')
-    return "success"
+
+def copy_stream(input_stream):
+    buffer = io.BytesIO()  # Or io.StringIO() for text data
+    shutil.copyfileobj(input_stream, buffer)
+    buffer.seek(0)  # Reset the buffer position to the beginning
+    return buffer
+
 
 def wrapper(func, arg, queue):
      queue.put(func(arg))
@@ -61,10 +41,19 @@ def index():
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in config['app']['allowed_extensions']
 
 def provide_dog_guess(guess: dict):
     return jsonify(guess)
+
+def runInParallel(*fns):
+    proc = []
+    for fn in fns:
+        p = Process(target=fn)
+        p.start()
+        proc.append(p)
+    for p in proc:
+        p.join()
 
 @application.route("/change_label", methods=["POST"])
 def change_label():
@@ -73,24 +62,30 @@ def change_label():
         flash('No user_file key in request.files')
         return redirect(url_for('index'))
     file = request.files['user_file']
+    filename = file.filename
+    file.save(filename)
 
     if file.filename == '':
         application.logger.warning(f'oh no')
         flash('No selected file')
         return redirect(url_for('index'))
+
+
     if file and allowed_file(file.filename):
-        q1, q2 = Queue(), Queue()
-        print(f'starting first thread')
-        Thread(target=wrapper, args=(upload_file_to_s3, file, q1)).start() 
-        print(f'starting second thread')
-        Thread(target=wrapper, args=(guess_dog, file, q2)).start()
-        dog_guessed = q2.get()
-        _ = q1.get()
+        with open(f'{filename}', 'rb') as input_file:
+            copy = copy_stream(input_file)
+
+        file2 = copy.read()
+        thread = Thread(target=upload_file_to_s3, args=(file2,))
+        dog_guessed = guess_dog(file)
+        print(f'starting thread')
+        thread.start()
+        print(f'returning json')
         return jsonify({"guess": dog_guessed, "visibility": "visible"})
     return jsonify({"guess": "None", "visibility": "visible"})
 
 
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port='8000')
-    #   application.run(host='0.0.0.0', port='8080', debug=True)
+    application.run(host=config['app']['host'], port=config['app']['port'])
+    # application.run(host=config['app']['host'], port=config['app']['port'], debug=True)

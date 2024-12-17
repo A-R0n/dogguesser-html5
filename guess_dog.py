@@ -1,10 +1,13 @@
 import sys
 import time
-from PIL import Image
+from PIL import Image, ImageFile
 import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 import torch
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 imagenet_classes_file = "imagenet_classes.txt"
 imagenet_classes_download = "https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt"
@@ -22,11 +25,7 @@ class GuessDog:
         self.transform = create_transform(**self.config)
         self.epoch_time = str(time.time_ns())
         self.file = file
-        self._open_with_pil()
         self._main()
-
-    def _open_with_pil(self):
-        self.img = Image.open(self.file).convert('RGB')
 
     def _get_output(self):
         with torch.no_grad():
@@ -50,21 +49,33 @@ class GuessDog:
                     category_name = self.categories[idx_category]
                     prob = str(round(float(self.topn_prob[i].item()*100), 1)) + "%"
                     print(f'category_name: {category_name}, prob: {prob}')
+                    self.top_guess = str(self.categories[idx_category]).title()
+                    return
                 except IndexError:
                     continue
             else:
-                break
-        idx_category = self.topn_catid[0]
-        if idx_category >= 151 and idx_category <= 275:
-            self.top_guess = str(self.categories[self.topn_catid[0]]).title()
+                continue
+
 
     def _main(self):
-        self.tensor = self.transform(self.img).unsqueeze(0)
+        print(f'opening with pil...')
+        try:
+            with Image.open(self.file) as img:
+                print(f'converting image')
+                img_converted = img.convert('RGB')
+                self.tensor = self.transform(img_converted).unsqueeze(0)
+
+        except ValueError:
+            print(f'value error I/O operation')
+            self.top_guess = 'N/A'
+            return
+        
         self.output = self._get_output()
         self.probabilities = torch.nn.functional.softmax(self.output[0], dim=0)
         self.categories = self._structure_imagenet_classes()
         self.topn_prob, self.topn_catid = self._get_most_probable(3)
         self._display_results()
+
 
 if __name__ == '__main__':
     guess_dog(sys.argv[1])
