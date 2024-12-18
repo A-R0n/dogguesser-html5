@@ -65,4 +65,8 @@ if __name__ == "__main__":
         host = application.config["HOST"],
         port = application.config["PORT"],
         debug = application.config["DEBUG"]
+<<<<<<< HEAD
     )
+=======
+    )
+>>>>>>> 3c41f55daa0ceae1be5c1897830a7267fb0af1e4
