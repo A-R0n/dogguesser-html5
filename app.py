@@ -16,9 +16,11 @@ application.wsgi_app = ProxyFix(
 
 if os.environ.get('FLASK_ENV') == 'production':
     print('were in prod')
+    application.logger.warning('were in production')
     application.config.from_object('config.ProductionConfig')
 else:
     print('were in dev')
+    application.logger.warning('were in dev')
     application.config.from_object('config.DevelopmentConfig')
 
 
