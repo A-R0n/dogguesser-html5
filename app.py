@@ -6,6 +6,9 @@ from guess_dog import guess_dog
 from upload_file_to_s3 import upload_file_to_s3
 from read_file_from_s3 import read_file_from_s3
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 logging.basicConfig(level=logging.WARNING)
