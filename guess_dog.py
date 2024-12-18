@@ -5,6 +5,7 @@ import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
 import torch
+from io import BytesIO
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -50,7 +51,7 @@ class GuessDog:
                     prob = str(round(float(self.topn_prob[i].item()*100), 1)) + "%"
                     print(f'category_name: {category_name}, prob: {prob}')
                     self.top_guess = str(self.categories[idx_category]).title()
-                    return
+                    # return
                 except IndexError:
                     continue
             else:
@@ -60,15 +61,15 @@ class GuessDog:
     def _main(self):
         print(f'opening with pil...')
         try:
-            with Image.open(self.file) as img:
-                print(f'converting image')
-                img_converted = img.convert('RGB')
-                self.tensor = self.transform(img_converted).unsqueeze(0)
+            image_stream = BytesIO(self.file)
+            img = Image.open(image_stream)
+            img_converted = img.convert('RGB')
+            self.tensor = self.transform(img_converted).unsqueeze(0)
 
         except ValueError:
             print(f'value error I/O operation')
             self.top_guess = 'N/A'
-            return
+            return 'N/A'
         
         self.output = self._get_output()
         self.probabilities = torch.nn.functional.softmax(self.output[0], dim=0)

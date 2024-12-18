@@ -1,9 +1,10 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, jsonify
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.utils import secure_filename
 import logging
 from guess_dog import guess_dog
 from upload_file_to_s3 import upload_file_to_s3
-import toml
+from read_file_from_s3 import read_file_from_s3
 import os
 
 
@@ -13,13 +14,12 @@ application.wsgi_app = ProxyFix(
     application.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
 )
 
-p ='config.toml'
-# p ="/home/ec2-user/app/config.toml"
-with open(p, "r") as f:
-    config = toml.load(f)
-
-application.config.from_object(config)
-application.config.secret_key = os.urandom(24)
+if os.environ.get('FLASK_ENV') == 'production':
+    print('were in prod')
+    application.config.from_object('config.ProductionConfig')
+else:
+    print('were in dev')
+    application.config.from_object('config.DevelopmentConfig')
 
 
 @application.route("/")
@@ -28,7 +28,7 @@ def index():
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in config['app']['allowed_extensions']
+        filename.rsplit('.', 1)[1].lower() in application.config['ALLOWED_EXTENSIONS']
 
 
 @application.route("/change_label", methods=["POST"])
@@ -48,12 +48,16 @@ def change_label():
 
 
     if file and allowed_file(file.filename):
-        dog_guessed = guess_dog(file)
-        upload_file_to_s3(file)
+        new_file_name = upload_file_to_s3(file)
+        img = read_file_from_s3(new_file_name)
+        dog_guessed = guess_dog(img)
         return jsonify({"guess": dog_guessed, "visibility": "visible"})
     return jsonify({"guess": "None", "visibility": "visible"})
 
 
 if __name__ == "__main__":
-    # application.run(host=config['app']['host'], port=config['app']['port'])
-    application.run(host=config['app']['host'], port=config['app']['port'], debug=True)
+    application.run(
+        host = application.config["HOST"],
+        port = application.config["PORT"],
+        debug = application.config["DEBUG"]
+    )

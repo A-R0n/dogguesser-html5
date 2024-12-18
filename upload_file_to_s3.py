@@ -26,16 +26,16 @@ def upload_file_to_s3(file) -> str:
     s3 = boto3.client('s3')
     try:
         print(f'attemtpting upload...')
-        with open(file.filename, 'rb') as img:
-            s3.upload_fileobj(
-                img,
-                'dogguesser',
-                new_file_name,
-                ExtraArgs={
-                    "ACL": "public-read",
-                    "ContentType": file.content_type
-                },
-                Config=config
-            )
+        s3.upload_fileobj(
+            file,
+            'dogguesser',
+            new_file_name,
+            ExtraArgs={
+                "ACL": "public-read",
+                "ContentType": file.content_type
+            },
+            Config=config
+        )
+        return new_file_name
     except Exception as e:
         print(f'file not uploaded: {e}')
